@@ -17,6 +17,12 @@ Approach (deliberately simple & explainable):
     WITH the specific term shown as evidence.
 
 We keep this intentionally lightweight (no external NLP model needed).
+
+Care taken here: cover letters are full of *document scaffolding* — greetings
+("Dear Hiring Manager"), titles ("COVER LETTER"), section headers, job titles
+("ML Engineer"), sign-offs ("Best Regards"). None of that is an "employer the
+resume forgot to mention", so we must NOT flag it. Getting this wrong produces
+embarrassing junk evidence, so entity extraction below is deliberately strict.
 """
 
 from __future__ import annotations
@@ -38,14 +44,41 @@ SKILL_KEYWORDS = {
     "html", "css", "tailwind", "graphql", "rest", "microservices",
 }
 
-# Capitalized words we should NOT treat as "employer/school" proper nouns.
-CAPS_STOPWORDS = {
+# Generic words we strip from the EDGES of a candidate entity, and that on
+# their own never make something a real "employer/school". Prepositions,
+# articles, sentence-openers, months, days, etc.
+EDGE_STOPWORDS = {
     "i", "the", "my", "a", "an", "we", "this", "that", "as", "in", "with",
-    "for", "at", "on", "during", "after", "before", "dear", "sincerely",
-    "hiring", "manager", "team", "regards", "thank", "you", "your", "company",
-    "role", "position", "january", "february", "march", "april", "may",
-    "june", "july", "august", "september", "october", "november", "december",
-    "monday", "tuesday", "wednesday", "thursday", "friday",
+    "for", "at", "on", "of", "to", "and", "or", "but", "so", "then", "also",
+    "during", "after", "before", "throughout", "currently", "previously",
+    "recently", "additionally", "moreover", "furthermore", "however",
+    "therefore", "here", "there", "while", "when", "where", "am", "is", "are",
+    "was", "were", "have", "has", "had", "you", "your", "their", "his", "her",
+    "january", "february", "march", "april", "may", "june", "july", "august",
+    "september", "october", "november", "december",
+    "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+}
+
+# If ANY word of a candidate phrase is one of these, the whole phrase is
+# document scaffolding — a greeting, a section header, a job title, or a
+# sign-off — NOT an employer the resume failed to mention. Drop it entirely.
+HARD_SCAFFOLDING = {
+    # document types / section headers
+    "cover", "letter", "resume", "cv", "curriculum", "vitae", "objective",
+    "summary", "profile", "experience", "education", "skills", "projects",
+    "project", "certifications", "certification", "references", "reference",
+    "contact", "portfolio", "achievements", "interests", "declaration",
+    # salutations & sign-offs
+    "dear", "hello", "hi", "greetings", "sincerely", "regards", "best",
+    "warm", "warmest", "kind", "kindly", "yours", "faithfully", "respectfully",
+    "cheers", "thanks", "thank", "sir", "madam", "whom", "concern",
+    # job-title / role words (a title is not an employer)
+    "hiring", "manager", "engineer", "developer", "scientist", "analyst",
+    "intern", "internship", "associate", "senior", "junior", "lead", "leader",
+    "specialist", "consultant", "coordinator", "assistant", "director",
+    "officer", "administrator", "architect", "designer", "recruiter",
+    "applicant", "candidate", "position", "role", "application", "team",
+    "department", "company", "organization", "organisation",
 }
 
 
@@ -54,17 +87,44 @@ def _skills_in(text: str) -> Set[str]:
     return {s for s in SKILL_KEYWORDS if s in low}
 
 
+def _clean_candidate(phrase: str) -> str:
+    """Strip leading/trailing filler words from a captured Capitalized phrase.
+
+    'At Google Cloud' -> 'Google Cloud'   (leading preposition removed)
+    'The New York'    -> 'New York'
+    """
+    words = phrase.split()
+    while words and words[0].lower() in EDGE_STOPWORDS:
+        words.pop(0)
+    while words and words[-1].lower() in EDGE_STOPWORDS:
+        words.pop()
+    return " ".join(words)
+
+
 def _proper_nouns_in(text: str) -> Set[str]:
-    """Multi-word Capitalized phrases (likely orgs/schools/products)."""
+    """Multi-word Capitalized phrases that look like real orgs/schools/products.
+
+    Strict on purpose (see module docstring). We process the text LINE BY LINE
+    so a title line and the greeting line below it can never merge into one
+    bogus phrase like 'COVER LETTER Dear Hiring Manager'.
+    """
     found: Set[str] = set()
-    for m in re.finditer(r"\b([A-Z][a-zA-Z&.]+(?:\s+[A-Z][a-zA-Z&.]+)+)\b", text):
-        phrase = m.group(1).strip()
-        words = phrase.split()
-        # Drop phrases made entirely of stopwords (e.g. "Dear Hiring Manager").
-        if all(w.lower() in CAPS_STOPWORDS for w in words):
-            continue
-        if len(phrase) >= 5:
-            found.add(phrase)
+    for line in text.splitlines():
+        for m in re.finditer(r"\b([A-Z][A-Za-z&.]+(?:\s+[A-Z][A-Za-z&.]+)+)\b", line):
+            phrase = _clean_candidate(m.group(1).strip())
+            words = phrase.split()
+            # Need at least two words left after trimming edges.
+            if len(words) < 2:
+                continue
+            lowered = [w.lower() for w in words]
+            # Drop anything containing document scaffolding / a job title.
+            if any(w in HARD_SCAFFOLDING for w in lowered):
+                continue
+            # Drop if what's left is nothing but generic edge words.
+            if all(w in EDGE_STOPWORDS for w in lowered):
+                continue
+            if len(phrase) >= 5:
+                found.add(phrase)
     return found
 
 

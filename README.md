@@ -88,16 +88,19 @@ Verum fuses **three analyzers** into a single `AuthenticityReport`.
 
 ### Engine A — Content authenticity
 
-`services/ai_analyzer.py` — detects AI-generated *writing* using classic stylometric signals, no paid API required.
+`services/ai_analyzer.py` — detects AI-generated *writing* from several cheap, independent signals, no paid API required. It analyzes the résumé **and** the cover letter together, because flowing cover-letter prose is far more revealing than terse résumé bullets.
 
 | Signal | What it measures | Why it flags AI |
 | --- | --- | --- |
-| **Burstiness** | Coefficient of variation of sentence lengths | Human writing mixes short and long sentences; LLM prose is rhythmically uniform |
-| **Buzzword density** | Rate of generic filler ("results-driven", "leveraged", "cutting-edge") per 100 words | AI-written resumes stack corporate buzzwords |
-| **Repeated openers** | How often sentences start with the same transition word | LLMs over-use "Furthermore / Moreover / Additionally" |
+| **AI cadence phrases** | Stock phrasings current chat models overuse ("a testament to", "thrive in fast-paced environments", "not only… but also") | The strongest cheap tell against a modern LLM |
+| **Buzzword / filler density** | Rate of generic filler ("results-driven", "leveraged", "passionate") per 100 words | AI-written applications stack corporate filler |
+| **Em-dash character** | Use of the typographic "—" / "–" | People type a plain hyphen "-"; the em-dash *character* is a machine trait |
+| **Triadic "rule of three"** | Parallel "X, Y, and Z" lists | Chat models lean on triads far more than most human writers |
+| **Repeated openers** | Sentences starting with the same transition word | LLMs over-use "Furthermore / Moreover / Additionally" |
+| **Burstiness** | Coefficient of variation of sentence lengths | Older models wrote uniformly — kept as a low-weight tie-breaker, since modern models vary sentence length on purpose |
 | **Perplexity** *(optional)* | GPT-2 surprise score of the text | Low perplexity ≈ predictable ≈ machine-written |
 
-> Perplexity uses HuggingFace `transformers` and is **off by default** so the app stays fast and deployable on a free tier. Flip one env var to enable it — see [Configuration](#configuration).
+> Modern frontier models defeat sentence-length ("burstiness") detection, so Engine A leans on **lexical and structural** tells — cadence phrasing, em-dash characters and triads — with burstiness as a minor tie-breaker. Perplexity uses HuggingFace `transformers` and is **off by default** so the app stays fast and deployable on a free tier — see [Configuration](#configuration).
 
 ### Engine B — Submission authenticity
 
@@ -120,10 +123,11 @@ Verum fuses **three analyzers** into a single `AuthenticityReport`.
 
 ### Fusion
 
-`main.py` combines the three into one score:
+`main.py` fuses the three engines. A naïve weighted average has a dangerous blind spot: when a **real person** submits AI-written text, the bot score is legitimately near zero and would drag the average below the review line — hiding obvious AI writing. But these are *independent* concerns: AI-written text is worth a second look even if a human clicked submit. So the overall concern is the **higher** of a weighted blend and the strongest single engine:
 
 ```
-overall_flag_score = 0.45 · bot  +  0.40 · ai_content  +  0.15 · inconsistency
+blend   = 0.45 · bot  +  0.40 · ai_content  +  0.15 · inconsistency
+overall = max( blend,  0.85 · ai_content,  0.90 · bot )
 ```
 
 mapped to a verdict:
@@ -133,6 +137,8 @@ mapped to a verdict:
 | `< 0.34` | Likely authentic |
 | `0.34 – 0.66` | Needs human review |
 | `> 0.66` | Strong AI/automation signals |
+
+The floor is deliberately scaled (×0.85 / ×0.90), so a single engine has to be fairly confident to raise the alarm alone — which keeps genuine applicants from being flagged by one weak signal.
 
 ---
 

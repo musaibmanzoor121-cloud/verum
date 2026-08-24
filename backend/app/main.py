@@ -73,8 +73,14 @@ def _assemble_report(
     started: float,
 ) -> AuthenticityReport:
     """Run all three engines and fuse them into a single report."""
-    # Engine A — content authenticity
-    content = ai_analyzer.analyze_content(resume_text, metadata_flags)
+    # Engine A — content authenticity. We analyze the applicant's writing as a
+    # WHOLE (resume + cover letter). A ChatGPT-written cover letter (flowing
+    # prose) is far more detectable than a terse bullet-point resume, so folding
+    # both in gives the content engine much more to work with.
+    content_text = resume_text
+    if cover_letter_text and cover_letter_text.strip():
+        content_text = f"{resume_text}\n\n{cover_letter_text}"
+    content = ai_analyzer.analyze_content(content_text, metadata_flags)
     # Cross-document consistency
     consistency = consistency_checker.compare_documents(resume_text, cover_letter_text)
     # Engine B — behavior / bot
@@ -88,10 +94,23 @@ def _assemble_report(
 
     # Fuse the sub-scores into one overall concern level.
     inconsistency = (1.0 - consistency.consistency_score) if consistency.checked else 0.0
-    overall = (
-        0.45 * behavior_result.bot_likelihood_score
-        + 0.40 * content.ai_likelihood_score
-        + 0.15 * inconsistency
+    bot = behavior_result.bot_likelihood_score
+    ai = content.ai_likelihood_score
+
+    # A weighted blend is the baseline reading...
+    blend = 0.45 * bot + 0.40 * ai + 0.15 * inconsistency
+
+    # ...but a plain average has a dangerous failure mode: when a *human*
+    # submits AI-written text, the bot score is legitimately ~0 and drags the
+    # average below the review line — hiding obvious AI writing. These are
+    # INDEPENDENT concerns: AI-written text is worth a look even if a real
+    # person clicked submit. So the overall concern is never less than what the
+    # single strongest engine says (scaled slightly, so one engine must be
+    # fairly confident to trigger on its own). Whichever is higher wins.
+    overall = max(
+        blend,
+        0.85 * ai,   # confident "this text is AI-written" alone -> human review
+        0.90 * bot,  # confident "this was a bot/script" alone -> human review
     )
     overall = max(0.0, min(1.0, overall))
 
