@@ -57,7 +57,9 @@ Recruiters now receive a flood of applications where the resume was written by C
 
 ## Live demo
 
-> **Live app:** `https://<your-app>.onrender.com` — replace with your deployed URL.
+> **Live app → [verum-zcf0.onrender.com](https://verum-zcf0.onrender.com)**
+>
+> _Hosted on Render's free tier — if the app has been idle it may take ~30–50 seconds to wake on the first request, then it's fast._
 
 | Applicant view | Recruiter console |
 | --- | --- |
