@@ -1,0 +1,13 @@
+# Render.com "Blueprint" — deploy with one click by pushing this repo and
+# choosing "New +  ->  Blueprint" in the Render dashboard.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: verum
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: USE_TRANSFORMER_PERPLEXITY
+        value: "false"

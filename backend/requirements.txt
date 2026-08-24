@@ -1,0 +1,19 @@
+# --- Verum backend: core runtime dependencies ---
+# These are intentionally lightweight so the app starts in seconds and fits
+# on a 512MB free-tier host.
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9      # required for file uploads / form fields
+pdfplumber>=0.11             # PDF text + metadata extraction
+python-docx>=1.1             # DOCX text + metadata extraction
+pydantic>=2.5,<3.0
+
+# --- OPTIONAL: real transformer perplexity (Engine A, GPT-2) --------------
+# These are HEAVY (torch is ~800MB) and are NOT needed for the app to run.
+# Install them and set USE_TRANSFORMER_PERPLEXITY=true only if you want the
+# language-model perplexity signal. The app degrades gracefully without them.
+#
+#   pip install torch transformers
+#
+# transformers>=4.40
+# torch>=2.2

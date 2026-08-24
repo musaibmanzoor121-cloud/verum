@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Base ---------------------------------------------------------------- */
+:root { color-scheme: light; }
+
+html, body, #root { height: 100%; }
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  /* Subtle grid texture reinforces the "console / instrument" feel without
+     shouting. Very low contrast so it never competes with content. */
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(11,18,32,0.035) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* ---- Signature element: the evidence highlight --------------------------
+   Flagged excerpts are shown like a highlighter marked them in a document —
+   directly echoing Verum's promise to always show the *exact* text. */
+.evidence-mark {
+  background: linear-gradient(180deg, transparent 55%, theme('colors.highlight') 55%);
+  padding: 0 0.15em;
+}
+
+/* ---- Confidence band track ----------------------------------------------
+   A range meter (not a single needle) — visualizing "band, not fake score". */
+.band-track {
+  background:
+    repeating-linear-gradient(90deg, theme('colors.line') 0 1px, transparent 1px 10%);
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: riseIn 0.35s ease-out both; }

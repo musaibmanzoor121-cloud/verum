@@ -1,0 +1,11 @@
+# Run the entire app (API + UI) with one command:  docker compose up --build
+# Then open http://localhost:8000
+services:
+  verum:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Keep the app light + fast. Set to "true" only if you added torch +
+      # transformers to requirements.txt and want real GPT-2 perplexity.
+      - USE_TRANSFORMER_PERPLEXITY=false

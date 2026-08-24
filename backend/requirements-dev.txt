@@ -1,0 +1,6 @@
+# Developer / testing dependencies (not needed to run the app in production).
+# Install with:  pip install -r requirements-dev.txt
+pytest>=8.0
+
+# Optional: only needed if you add API-level tests using FastAPI's TestClient.
+# httpx>=0.27

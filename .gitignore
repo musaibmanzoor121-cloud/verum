@@ -1,0 +1,42 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+.vite/
+
+# ---- Env & secrets (keep .env.example, ignore real .env) ----
+.env
+.env.local
+.env.*.local
+
+# ---- Build artifact: compiled frontend copied into backend ----
+backend/static/
+
+# ---- OS / editors ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# ---- FUSE / editor ghost files ----
+.fuse_hidden*
+*~
+*.swp
+
+# ---- Personal prep material (kept local, not published) ----
+GUIDE.md
+docs/LINKEDIN_POST.md
+docs/RESUME_BULLETS.md
+
+# ---- Temp verification folder (safe to delete from File Explorer) ----
+_gitcheck_tmp/
