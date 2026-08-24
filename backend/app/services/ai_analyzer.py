@@ -372,6 +372,19 @@ def analyze_content(text: str, metadata_flags: Optional[List[str]] = None) -> Co
         score = (0.30 * ai_from_buzz + 0.26 * ai_from_cadence
                  + 0.11 * ai_from_emdash + 0.11 * ai_from_triadic
                  + 0.10 * ai_from_openers + 0.12 * ai_from_burst)
+
+    # ---- Corroboration boost --------------------------------------------
+    # Several INDEPENDENT tells firing together is far stronger evidence than
+    # one tell firing hard. A modern chat-model application typically trips 3-4
+    # different signals (em-dash + triads + cadence + filler) even when each is
+    # individually mild — while a genuine person typing by hand trips zero or
+    # one. So we add a modest boost per distinct content signal beyond the
+    # first. This lifts multi-signal (AI-polished) text toward human review
+    # WITHOUT touching honest writers, who simply don't light up 3 signals.
+    distinct_signals = len({e.signal for e in evidence if e.engine == "content"})
+    corroboration = min(0.18, 0.06 * max(0, distinct_signals - 1))
+    score += corroboration
+
     if metadata_flags:
         score = _clamp(score + 0.10)
     score = _clamp(score)
