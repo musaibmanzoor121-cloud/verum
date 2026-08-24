@@ -365,24 +365,29 @@ def analyze_content(text: str, metadata_flags: Optional[List[str]] = None) -> Co
     # tie-breaker because modern models defeat it. When a real GPT-2 perplexity
     # number is available, it joins the blend.
     if ai_from_ppl is not None:
-        score = (0.24 * ai_from_ppl + 0.22 * ai_from_buzz + 0.22 * ai_from_cadence
-                 + 0.10 * ai_from_emdash + 0.10 * ai_from_triadic
-                 + 0.06 * ai_from_openers + 0.06 * ai_from_burst)
+        score = (0.22 * ai_from_ppl + 0.20 * ai_from_buzz + 0.20 * ai_from_cadence
+                 + 0.15 * ai_from_emdash + 0.14 * ai_from_triadic
+                 + 0.05 * ai_from_openers + 0.04 * ai_from_burst)
     else:
-        score = (0.30 * ai_from_buzz + 0.26 * ai_from_cadence
-                 + 0.11 * ai_from_emdash + 0.11 * ai_from_triadic
-                 + 0.10 * ai_from_openers + 0.12 * ai_from_burst)
+        score = (0.28 * ai_from_buzz + 0.24 * ai_from_cadence
+                 + 0.16 * ai_from_emdash + 0.15 * ai_from_triadic
+                 + 0.09 * ai_from_openers + 0.08 * ai_from_burst)
 
     # ---- Corroboration boost --------------------------------------------
     # Several INDEPENDENT tells firing together is far stronger evidence than
     # one tell firing hard. A modern chat-model application typically trips 3-4
-    # different signals (em-dash + triads + cadence + filler) even when each is
-    # individually mild — while a genuine person typing by hand trips zero or
-    # one. So we add a modest boost per distinct content signal beyond the
-    # first. This lifts multi-signal (AI-polished) text toward human review
-    # WITHOUT touching honest writers, who simply don't light up 3 signals.
+    # different signals at once (em-dash + triads + cadence + filler) even when
+    # each is individually mild — while a genuine person typing by hand trips
+    # zero or one. Crucially, this boost keys off the *count of distinct
+    # signals*, not their strength, so it CANNOT be triggered by a single
+    # stylistic quirk: an honest writer who happens to use one em-dash, or a few
+    # buzzwords, lights up one signal and gets ZERO boost. It only bites when
+    # multiple independent machine-tells co-occur — the pattern real applicants
+    # don't reproduce. We make it decisive (not marginal) so multi-signal
+    # AI-polished text lands clearly inside human review rather than hovering on
+    # the threshold, while every 0-1 signal writer is left completely untouched.
     distinct_signals = len({e.signal for e in evidence if e.engine == "content"})
-    corroboration = min(0.18, 0.06 * max(0, distinct_signals - 1))
+    corroboration = min(0.34, 0.14 * max(0, distinct_signals - 1))
     score += corroboration
 
     if metadata_flags:
