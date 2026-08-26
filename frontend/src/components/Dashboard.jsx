@@ -37,30 +37,40 @@ export default function Dashboard({ submissions, selectedId, onSelect }) {
   const c = r.content
   const b = r.behavior
   const cons = r.consistency
+  const verdictTone = TONE[toneFor(r.overall_flag_score)]
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-      {/* Left rail: submission list */}
+    <div className="grid gap-6 lg:grid-cols-[264px_1fr]">
+      {/* Left rail: triage queue */}
       <aside className="space-y-2">
-        <div className="px-1 font-mono text-[11px] uppercase tracking-widest text-brand/70">
-          Queue · {submissions.length}
+        <div className="flex items-baseline justify-between px-1">
+          <span className="font-mono text-[11px] uppercase tracking-widest text-brand/70">
+            Queue
+          </span>
+          <span className="font-mono text-[11px] tabular-nums text-muted">
+            {submissions.length}
+          </span>
         </div>
         {submissions.map((s) => {
           const active = s.id === current.id
+          const st = TONE[toneFor(s.report.overall_flag_score)]
           return (
             <button
               key={s.id}
               onClick={() => onSelect(s.id)}
               className={
-                'block w-full rounded-xl border p-3 text-left transition ' +
+                'relative block w-full overflow-hidden rounded-xl border p-3 pl-4 text-left transition ' +
                 (active
                   ? 'border-brand/40 bg-white shadow-panel'
-                  : 'border-line bg-panel hover:border-brand/20')
+                  : 'border-line bg-panel hover:border-brand/20 hover:bg-white')
               }
             >
+              <span className={`absolute inset-y-0 left-0 w-1 ${st.bg}`} aria-hidden="true" />
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-sm font-medium text-ink">{s.name}</span>
-                <span className="font-mono text-[11px] text-muted">{pct(s.report.overall_flag_score)}</span>
+                <span className={`font-mono text-sm font-semibold tabular-nums ${st.text}`}>
+                  {pct(s.report.overall_flag_score)}
+                </span>
               </div>
               <div className="mt-1.5">
                 <VerdictChip score={s.report.overall_flag_score}>{s.report.verdict}</VerdictChip>
@@ -72,25 +82,23 @@ export default function Dashboard({ submissions, selectedId, onSelect }) {
 
       {/* Detail */}
       <section className="space-y-6">
-        {/* Verdict header */}
-        <div className="rounded-xl2 border border-line bg-panel p-6 shadow-panel">
+        {/* Verdict header — the instrument readout */}
+        <div className="relative overflow-hidden rounded-xl2 border border-line bg-panel p-6 pl-7 shadow-panel">
+          <span className={`absolute inset-y-0 left-0 w-1.5 ${verdictTone.bg}`} aria-hidden="true" />
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="font-mono text-[11px] uppercase tracking-widest text-brand/70">
                 Authenticity report · {current.name}
               </div>
-              <h2 className="font-display text-2xl text-ink">{r.verdict}</h2>
+              <h2 className={`font-display text-2xl ${verdictTone.text}`}>{r.verdict}</h2>
               <p className="mt-1 max-w-xl text-sm text-muted">{r.recommendation}</p>
             </div>
-            <VerdictChip score={r.overall_flag_score}>
-              Overall concern {pct(r.overall_flag_score)}
-            </VerdictChip>
           </div>
-          <div className="mt-5 max-w-md">
-            <ScoreBand score={r.overall_flag_score} title="Overall concern" />
+          <div className="mt-6">
+            <ScoreBand score={r.overall_flag_score} title="Overall concern" variant="hero" />
           </div>
-          <p className="mt-3 font-mono text-[11px] text-muted">
-            Processed in {r.processing_ms} ms · perplexity method: {c.perplexity_method}
+          <p className="mt-4 font-mono text-[11px] tabular-nums text-muted">
+            processed in {r.processing_ms} ms · perplexity method: {c.perplexity_method}
           </p>
         </div>
 
@@ -138,7 +146,7 @@ export default function Dashboard({ submissions, selectedId, onSelect }) {
         <div>
           <div className="mb-3 flex items-baseline justify-between">
             <h3 className="font-display text-lg text-ink">Evidence — why this was flagged</h3>
-            <span className="font-mono text-[11px] text-muted">{r.evidence.length} item(s)</span>
+            <span className="font-mono text-[11px] tabular-nums text-muted">{r.evidence.length} item(s)</span>
           </div>
           {r.evidence.length === 0 ? (
             <div className="rounded-xl border border-verify/30 bg-verify/5 p-4 text-sm text-verify">
