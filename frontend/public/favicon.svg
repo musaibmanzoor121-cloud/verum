@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Verum favicon: simplified logomark tuned for 16–32px tab sizes.
+       Inner detail is dropped and strokes thickened so the V-needle and its
+       reading point stay legible when tiny. -->
+  <rect width="32" height="32" rx="8" fill="#0B1220"/>
+  <!-- baseline + one center threshold tick (two ticks blur at 16px, so keep one) -->
+  <line x1="9" y1="23" x2="23" y2="23" stroke="#3A465A" stroke-width="2" stroke-linecap="round"/>
+  <!-- V-needle -->
+  <path d="M9.5 9 L16 21 L22.5 9" stroke="#17A2B8" stroke-width="3.4"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- reading point -->
+  <circle cx="16" cy="21" r="2.6" fill="#F5F7FA"/>
+</svg>

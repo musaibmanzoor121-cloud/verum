@@ -1,0 +1,12 @@
+{
+  "name": "Verum — Applicant Authenticity Engine",
+  "short_name": "Verum",
+  "description": "Explainable screening that flags AI-written and bot-submitted job applications — and shows its evidence for every flag.",
+  "icons": [
+    { "src": "/android-chrome-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#0B1220",
+  "background_color": "#F5F7FA",
+  "display": "standalone"
+}

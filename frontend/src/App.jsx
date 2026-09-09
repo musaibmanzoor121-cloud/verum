@@ -2,13 +2,29 @@ import { useState } from 'react'
 import ApplyForm from './components/ApplyForm'
 import Dashboard from './components/Dashboard'
 
-// The mark: a small monogram tile. Kept minimal so the confidence-band meter
-// and evidence cards remain the memorable elements, not the logo.
+// The mark: Verum's logomark — a V-shaped instrument needle taking a reading
+// against a measurement baseline with two decision-threshold ticks. It's the
+// product's thesis (a reading between thresholds, never a binary stamp) as a
+// glyph. Inlined as SVG so it's crisp at any size and needs no network request.
 function Mark() {
   return (
-    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-bold text-white">
-      V
-    </div>
+    <svg
+      className="h-9 w-9"
+      viewBox="0 0 512 512"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Verum"
+    >
+      <title>Verum</title>
+      <rect x="16" y="16" width="480" height="480" rx="112" fill="#0B1220" />
+      <line x1="140" y1="356" x2="372" y2="356" stroke="#313C4E" strokeWidth="12" strokeLinecap="round" />
+      <line x1="218" y1="342" x2="218" y2="370" stroke="#5B6472" strokeWidth="12" strokeLinecap="round" />
+      <line x1="294" y1="342" x2="294" y2="370" stroke="#5B6472" strokeWidth="12" strokeLinecap="round" />
+      <path d="M150 150 L256 330 L362 150" stroke="#12657A" strokeWidth="46" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="256" cy="330" r="30" fill="#F5F7FA" />
+      <circle cx="256" cy="330" r="14" fill="#0E4F5C" />
+    </svg>
   )
 }
 

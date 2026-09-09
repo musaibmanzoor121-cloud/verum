@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Verum">
+  <title>Verum</title>
+  <!--
+    Verum logomark
+    ==============
+    The product's thesis, distilled to one glyph: a reading on an instrument,
+    not a binary stamp. A downward chevron — the "V" of Verum, doubling as an
+    instrument needle/pointer — takes a reading against a measurement baseline
+    that carries two threshold ticks (the authentic / review / strong zones of
+    the confidence-band meter). Monochrome, geometric, legible to 16px.
+  -->
+  <defs>
+    <linearGradient id="vm-needle" x1="128" y1="96" x2="384" y2="352" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#12657A"/>
+      <stop offset="1" stop-color="#0E4F5C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded tile in Verum ink so the mark sits on any background -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#0B1220"/>
+
+  <!-- measurement baseline -->
+  <line x1="140" y1="356" x2="372" y2="356" stroke="#313C4E" stroke-width="12" stroke-linecap="round"/>
+  <!-- two decision-threshold ticks (the 0.34 / 0.66 verdict boundaries) -->
+  <line x1="218" y1="342" x2="218" y2="370" stroke="#5B6472" stroke-width="12" stroke-linecap="round"/>
+  <line x1="294" y1="342" x2="294" y2="370" stroke="#5B6472" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- the V-needle taking its reading: chevron down to a point on the baseline -->
+  <path d="M150 150 L256 330 L362 150" stroke="url(#vm-needle)" stroke-width="46"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- reading point where the needle meets the scale -->
+  <circle cx="256" cy="330" r="30" fill="#F5F7FA"/>
+  <circle cx="256" cy="330" r="14" fill="#0E4F5C"/>
+</svg>
