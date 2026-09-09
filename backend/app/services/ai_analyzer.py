@@ -207,6 +207,21 @@ def find_buzzwords(text: str) -> List[str]:
     return found
 
 
+def count_buzzword_hits(text: Optional[str] = None,
+                        found: Optional[List[str]] = None) -> int:
+    """Total buzzword occurrences (repeats counted), used for filler density.
+
+    Pass a pre-computed `found` list (from `find_buzzwords`) to avoid scanning
+    twice; otherwise supply `text`. Factored out so the ML feature extractor in
+    services/features.py computes density identically to the live engine.
+    """
+    found = found if found is not None else find_buzzwords(text or "")
+    return sum(
+        int(re.search(r"\(x(\d+)\)", b).group(1)) if "(x" in b else 1
+        for b in found
+    )
+
+
 def find_cadence_phrases(text: str) -> List[str]:
     """Return the actual AI-cadence phrases found in the text (for evidence)."""
     hits: List[str] = []
@@ -265,8 +280,7 @@ def analyze_content(text: str, metadata_flags: Optional[List[str]] = None) -> Co
 
     # ---- Signal 2: buzzword / filler density -----------------------------
     buzzwords = find_buzzwords(text)
-    buzz_hits = sum(int(re.search(r"\(x(\d+)\)", b).group(1)) if "(x" in b else 1
-                    for b in buzzwords)
+    buzz_hits = count_buzzword_hits(found=buzzwords)
     density = (buzz_hits / max(words, 1)) * 100  # hits per 100 words
     ai_from_buzz = _clamp(density / 2.0)
     if buzzwords:
@@ -390,6 +404,42 @@ def analyze_content(text: str, metadata_flags: Optional[List[str]] = None) -> Co
     corroboration = min(0.34, 0.14 * max(0, distinct_signals - 1))
     score += corroboration
 
+    # ---- Optional: the LEARNED model replaces the hand-tuned blend --------
+    # Opt-in via USE_LEARNED_MODEL (default off). Every signal + evidence item
+    # above still stands — they explain the text no matter which scorer we use.
+    # Here we swap only the *combination*: instead of the hand-picked weights +
+    # corroboration boost, we use weights LEARNED by the logistic-regression
+    # model in model.json (see eval/train_model.py). If the model file is
+    # missing or invalid, score_vector() returns None and we keep the heuristic
+    # score — so enabling this can never take the API down. Imports are local
+    # because services/features.py imports from this module (avoids a cycle).
+    score_method = "heuristic"
+    if settings.USE_LEARNED_MODEL:
+        from app.services import ml_model
+        from app.services.features import extract_vector
+
+        vector = extract_vector(text)
+        learned = ml_model.score_vector(vector)
+        if learned is not None:
+            score = learned
+            score_method = "learned"
+            contribs = ml_model.top_contributions(vector, k=3)
+            if contribs:
+                pretty = "; ".join(
+                    f"{name} ({'+' if c >= 0 else ''}{c:.2f})" for name, c in contribs
+                )
+                evidence.append(EvidenceItem(
+                    engine="content",
+                    signal="learned_model",
+                    detail=(f"A trained logistic-regression model (leave-one-out "
+                            f"cross-validated ROC-AUC ≈ 0.84) put this at "
+                            f"{score * 100:.0f}% likely AI-written. Biggest "
+                            f"factors: {pretty} — positive values push toward AI, "
+                            f"negative toward human."),
+                    severity="low" if score < 0.5 else ("medium" if score < 0.75 else "high"),
+                    excerpt=None,
+                ))
+
     if metadata_flags:
         score = _clamp(score + 0.10)
     score = _clamp(score)
@@ -397,6 +447,7 @@ def analyze_content(text: str, metadata_flags: Optional[List[str]] = None) -> Co
     return ContentAnalysis(
         ai_likelihood_band=_score_to_band(score, "likely AI-assisted"),
         ai_likelihood_score=round(score, 3),
+        score_method=score_method,
         perplexity=round(perplexity, 2) if perplexity is not None else None,
         perplexity_method=perplexity_method,
         burstiness=round(burst, 3),

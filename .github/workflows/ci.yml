@@ -1,0 +1,83 @@
+name: CI
+
+# Run on every push to main and on every pull request that targets main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-eval:
+    name: Tests + honest evaluation
+    runs-on: ubuntu-latest
+    strategy:
+      # Don't cancel the other Python versions if one fails — we want the full
+      # picture.
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+
+      # Train the LEARNED logistic-regression model from the labelled samples so
+      # the committed artifacts (app/services/model.json, eval/cv_scores.json,
+      # eval/MODEL_CARD.md) always reflect the CURRENT feature code. This runs
+      # BEFORE the tests on purpose: tests/test_learned_gate.py reads these files,
+      # so regenerating them first means the gate always checks live numbers, not
+      # a stale commit. Training uses numpy only (a dev/CI dependency); the app
+      # still SERVES the model in pure Python.
+      - name: Train the learned model (numpy)
+        working-directory: backend
+        run: python -m eval.train_model
+
+      # The unit tests AND the quality gate (tests/test_eval_gate.py) run here.
+      # The gate fails the build if ROC-AUC regresses, if any genuine human is
+      # flagged at the product threshold, or if recall collapses.
+      - name: Run unit tests + quality gate
+        working-directory: backend
+        run: pytest -q
+
+      # Regenerate the honest reports so they always reflect the current code.
+      # If any of these ever crash, CI catches it.
+      - name: Engine A evaluation (accuracy / ROC-AUC)
+        working-directory: backend
+        run: python -m eval.evaluate
+
+      - name: Adversarial robustness evaluation
+        working-directory: backend
+        run: python -m eval.robustness
+
+      - name: Fairness-by-writing-style evaluation
+        working-directory: backend
+        run: python -m eval.fairness
+
+      # Make the freshly generated reports downloadable from the CI run.
+      - name: Upload evaluation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-reports-py${{ matrix.python-version }}
+          path: |
+            backend/eval/REPORT.md
+            backend/eval/ROBUSTNESS.md
+            backend/eval/FAIRNESS.md
+            backend/eval/MODEL_CARD.md
+            backend/eval/cv_scores.json
+          if-no-files-found: warn

@@ -2,5 +2,19 @@
 # Install with:  pip install -r requirements-dev.txt
 pytest>=8.0
 
-# Optional: only needed if you add API-level tests using FastAPI's TestClient.
-# httpx>=0.27
+# Required by the end-to-end API tests: FastAPI's TestClient is built on
+# Starlette's, which uses httpx under the hood. Without this, the tests that
+# post to /api/analyze-text cannot even be collected.
+httpx>=0.27
+
+# Required to TRAIN the learned model (eval/train_model.py): the trainer does
+# its logistic-regression math in numpy. This is a dev/CI-only dependency —
+# the app SERVES the model in pure Python (services/ml_model.py), so numpy is
+# NOT in requirements.txt and is never needed at run time on the host.
+numpy>=1.24
+
+# Optional cross-check backend for the trainer (`python -m eval.train_model
+# --backend sklearn`). The numpy trainer is canonical and always used in CI, so
+# scikit-learn is left commented out to keep installs light. Uncomment if you
+# want to verify the two trainers agree.
+# scikit-learn>=1.3

@@ -54,6 +54,16 @@ class Settings:
     # Which HF model to use IF the transformer path is enabled.
     PERPLEXITY_MODEL: str = os.getenv("PERPLEXITY_MODEL", "gpt2")
 
+    # Whether Engine A should score with the LEARNED logistic-regression model
+    # (app/services/model.json, trained by eval/train_model.py) instead of the
+    # hand-tuned heuristic blend. DISABLED by default: the heuristic is the
+    # validated, 0%-false-positive default, and keeping the learned model opt-in
+    # means enabling it can never surprise the existing behavior/tests. If turned
+    # on but model.json is missing or invalid, Engine A automatically falls back
+    # to the heuristic (see services/ml_model.py). Serving the learned model adds
+    # no heavy dependencies — it is a pure-Python dot product.
+    USE_LEARNED_MODEL: bool = _get_bool("USE_LEARNED_MODEL", False)
+
     # ---- Bot / behavior detection (Engine B) ------------------------------
     # Submissions faster than this many seconds are suspicious (humans can't
     # read + fill a real form this fast).

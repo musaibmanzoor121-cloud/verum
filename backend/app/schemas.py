@@ -91,6 +91,7 @@ class ContentAnalysis(BaseModel):
 
     ai_likelihood_band: str  # e.g. "60–75% likely AI-assisted"
     ai_likelihood_score: float  # 0..1 internal score behind the band
+    score_method: str = "heuristic"  # "heuristic" (hand-tuned blend) | "learned" (model.json)
     perplexity: Optional[float] = None
     perplexity_method: str  # "gpt2" or "heuristic"
     burstiness: float  # variance in sentence length (higher = more human)

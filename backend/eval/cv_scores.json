@@ -1,0 +1,211 @@
+{
+  "method": "leave-one-out cross-validation",
+  "product_threshold_heuristic": 0.4,
+  "learned_threshold": 0.5,
+  "summary": {
+    "learned_cv_roc_auc": 0.8418,
+    "learned_cv_fpr_at_0.5": 0.0714,
+    "learned_cv_recall_at_0.5": 0.7857,
+    "heuristic_roc_auc": 0.9031,
+    "heuristic_fpr_at_product": 0.0,
+    "heuristic_recall_at_product": 0.7857
+  },
+  "rows": [
+    {
+      "id": "h01",
+      "label": "human",
+      "style": "casual, concrete, uneven",
+      "heuristic": 0.0,
+      "learned_cv": 0.2521
+    },
+    {
+      "id": "h02",
+      "label": "human",
+      "style": "non-native English, honest, specific",
+      "heuristic": 0.037,
+      "learned_cv": 0.2865
+    },
+    {
+      "id": "h03",
+      "label": "human",
+      "style": "formal senior eng, uses ONE em-dash (hard case)",
+      "heuristic": 0.124,
+      "learned_cv": 0.3425
+    },
+    {
+      "id": "h04",
+      "label": "human",
+      "style": "new grad, mild career-services buzzwords",
+      "heuristic": 0.283,
+      "learned_cv": 0.6472
+    },
+    {
+      "id": "h05",
+      "label": "human",
+      "style": "career changer, healthcare -> tech, personal",
+      "heuristic": 0.013,
+      "learned_cv": 0.2612
+    },
+    {
+      "id": "h06",
+      "label": "human",
+      "style": "trades, plain, specific",
+      "heuristic": 0.0,
+      "learned_cv": 0.2521
+    },
+    {
+      "id": "h07",
+      "label": "human",
+      "style": "blunt short note",
+      "heuristic": 0.0,
+      "learned_cv": 0.2521
+    },
+    {
+      "id": "h08",
+      "label": "human",
+      "style": "academic, formal but specific",
+      "heuristic": 0.009,
+      "learned_cv": 0.258
+    },
+    {
+      "id": "h09",
+      "label": "human",
+      "style": "sales, numbers-heavy, direct",
+      "heuristic": 0.029,
+      "learned_cv": 0.2762
+    },
+    {
+      "id": "h10",
+      "label": "human",
+      "style": "designer, portfolio voice",
+      "heuristic": 0.0,
+      "learned_cv": 0.2521
+    },
+    {
+      "id": "h11",
+      "label": "human",
+      "style": "polished PM, em-dash + two triads (HARD, overlaps AI)",
+      "heuristic": 0.33,
+      "learned_cv": 0.4477
+    },
+    {
+      "id": "h12",
+      "label": "human",
+      "style": "quirky, humorous, specific",
+      "heuristic": 0.023,
+      "learned_cv": 0.2699
+    },
+    {
+      "id": "h13",
+      "label": "human",
+      "style": "non-native, short, plain",
+      "heuristic": 0.035,
+      "learned_cv": 0.284
+    },
+    {
+      "id": "h14",
+      "label": "human",
+      "style": "bootcamp grad, earnest, specific",
+      "heuristic": 0.05,
+      "learned_cv": 0.279
+    },
+    {
+      "id": "a01",
+      "label": "ai",
+      "style": "classic ChatGPT cover letter",
+      "heuristic": 0.899,
+      "learned_cv": 0.8845
+    },
+    {
+      "id": "a02",
+      "label": "ai",
+      "style": "ChatGPT resume summary",
+      "heuristic": 0.621,
+      "learned_cv": 0.7879
+    },
+    {
+      "id": "a03",
+      "label": "ai",
+      "style": "Claude-style polished cadence",
+      "heuristic": 0.952,
+      "learned_cv": 0.8904
+    },
+    {
+      "id": "a04",
+      "label": "ai",
+      "style": "Gemini-style, structured, triads + em-dashes",
+      "heuristic": 0.845,
+      "learned_cv": 0.7837
+    },
+    {
+      "id": "a05",
+      "label": "ai",
+      "style": "heavy em-dashes + triads, few buzzwords (representative)",
+      "heuristic": 0.615,
+      "learned_cv": 0.3801
+    },
+    {
+      "id": "a06",
+      "label": "ai",
+      "style": "LIGHTLY HUMANIZED AI (tells edited out \u2014 HARD, likely missed)",
+      "heuristic": 0.032,
+      "learned_cv": 0.2128
+    },
+    {
+      "id": "a07",
+      "label": "ai",
+      "style": "AI listing skills in rule-of-three",
+      "heuristic": 0.77,
+      "learned_cv": 0.7699
+    },
+    {
+      "id": "a08",
+      "label": "ai",
+      "style": "over-formal AI, transition-opener spam",
+      "heuristic": 0.48,
+      "learned_cv": 0.6731
+    },
+    {
+      "id": "a09",
+      "label": "ai",
+      "style": "AI for a non-tech (marketing) role",
+      "heuristic": 0.729,
+      "learned_cv": 0.7982
+    },
+    {
+      "id": "a10",
+      "label": "ai",
+      "style": "old-style buzzword spam",
+      "heuristic": 0.318,
+      "learned_cv": 0.6106
+    },
+    {
+      "id": "a11",
+      "label": "ai",
+      "style": "AI new-grad cover letter",
+      "heuristic": 0.898,
+      "learned_cv": 0.884
+    },
+    {
+      "id": "a12",
+      "label": "ai",
+      "style": "AI 'unique blend / valuable asset'",
+      "heuristic": 0.858,
+      "learned_cv": 0.8724
+    },
+    {
+      "id": "a13",
+      "label": "ai",
+      "style": "generic AI 'in today's world'",
+      "heuristic": 0.549,
+      "learned_cv": 0.7423
+    },
+    {
+      "id": "a14",
+      "label": "ai",
+      "style": "LIGHTLY HUMANIZED AI #2 (HARD, likely missed)",
+      "heuristic": 0.0,
+      "learned_cv": 0.1883
+    }
+  ]
+}

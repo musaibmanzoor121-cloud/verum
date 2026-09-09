@@ -1,0 +1,59 @@
+{
+  "model_type": "logistic_regression",
+  "trainer": "numpy-gd",
+  "feature_names": [
+    "buzzword",
+    "cadence",
+    "em_dash",
+    "triadic",
+    "openers",
+    "burstiness",
+    "distinct_signals"
+  ],
+  "standardize": false,
+  "standardization": {
+    "mean": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "std": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "coef": [
+    1.53519693,
+    1.02462071,
+    0.1793772,
+    0.3826979,
+    0.0,
+    0.33949477,
+    0.81520582
+  ],
+  "intercept": -1.17200128,
+  "l2": 1.0,
+  "training": {
+    "n_samples": 28,
+    "n_human": 14,
+    "n_ai": 14,
+    "dataset": "eval/dataset.py (built-in starter set)",
+    "created_utc": "2026-08-27T08:41:16Z"
+  },
+  "cv": {
+    "method": "leave-one-out",
+    "roc_auc": 0.8418,
+    "fpr_at_0.5": 0.0714,
+    "recall_at_0.5": 0.7857
+  },
+  "notes": "To score: transform each feature with the stored mean/std ((x - mean) / std; here an identity transform since standardize=false), take the dot product with coef, add intercept, apply the logistic sigmoid. Serving is pure-Python (see services/ml_model.py) \u2014 no numpy needed at run time."
+}
